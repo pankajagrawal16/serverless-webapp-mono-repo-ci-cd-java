@@ -9,13 +9,12 @@ import software.amazon.awscdk.core.Environment;
 import software.amazon.awscdk.core.Stack;
 import software.amazon.awscdk.core.StackProps;
 import software.amazon.awscdk.pipelines.AddStageOpts;
-import software.amazon.awscdk.pipelines.CodeBuildOptions;
+import software.amazon.awscdk.pipelines.CodeBuildStep;
+import software.amazon.awscdk.pipelines.CodeBuildStepProps;
 import software.amazon.awscdk.pipelines.CodePipeline;
 import software.amazon.awscdk.pipelines.CodePipelineSource;
 import software.amazon.awscdk.pipelines.ManualApprovalStep;
 import software.amazon.awscdk.pipelines.S3SourceOptions;
-import software.amazon.awscdk.pipelines.ShellStep;
-import software.amazon.awscdk.pipelines.ShellStepProps;
 import software.amazon.awscdk.pipelines.Step;
 import software.amazon.awscdk.services.cloudtrail.ReadWriteType;
 import software.amazon.awscdk.services.cloudtrail.S3EventSelector;
@@ -131,18 +130,22 @@ public class FrontEndCdkPipelineStack extends Stack {
         CodePipeline codePipeline = CodePipeline.Builder.create(this, "WebApplicationFrontEndCdkPipeline")
                 .pipelineName("WebApplicationFrontEndCdkPipeline")
                 .crossAccountKeys(false)
-                .selfMutation(true)
-                .synth(new ShellStep("Synth", ShellStepProps.builder()
-                        .input(CodePipelineSource.s3(frontEndArtifactBucket, sourceZip, S3SourceOptions.builder()
-                                .trigger(S3Trigger.EVENTS)
-                                .actionName("S3FrontEndSource")
-                                .build()))
+                .selfMutation(false)
+                .synth(new CodeBuildStep("FrontEndSynth", CodeBuildStepProps.builder()
                         .commands(asList(
                                 "cd frontend-infrastructure",
                                 "npm install -g aws-cdk",
                                 "cdk synth serverless-web-application-frontend"
                         ))
-                        .primaryOutputDirectory("frontend-infrastructure/cdk.out")
+                        .input(CodePipelineSource.s3(frontEndArtifactBucket, sourceZip, S3SourceOptions.builder()
+                                .trigger(S3Trigger.EVENTS)
+                                .actionName("S3FrontEndSource")
+                                .build()))
+                        .projectName("FrontEndSynth")
+                        .buildEnvironment(BuildEnvironment.builder()
+                                .computeType(LARGE)
+                                .buildImage(AMAZON_LINUX_2_ARM)
+                                .build())
                         .build()))
                 .build();
 
