@@ -46,7 +46,7 @@ jobs:
       uses: azure/CLI@v1
       with:
         inlineScript: |
-            az storage blob upload-batch --account-name  facerecogwebsite --auth-mode key -d '$web' -s ./frontend/public/
+            az storage blob upload-batch --account-name  facerecogwebsite --auth-mode key -d '$web' -s ./frontend/public/ --overwrite
   # Azure logout
     - name: logout
       run: |
