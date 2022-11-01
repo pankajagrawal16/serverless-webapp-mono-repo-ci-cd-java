@@ -2,7 +2,7 @@ name: CI with OpenID Connect
 
 on:
     push:
-        branches: [ main ]
+        branches: [ master ]
         paths:
           - frontend/**
 
