@@ -37,6 +37,7 @@ jobs:
       working-directory: ./frontend
       run: npm test
   deploy:
+    needs: build
     runs-on: ubuntu-latest
     name: Deploy to azure storage
     steps:
