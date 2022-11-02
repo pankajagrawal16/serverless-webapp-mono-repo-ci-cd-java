@@ -1,4 +1,4 @@
-name: CI with OpenID Connect
+name: Build and deploy Deploy frontend to azure storage
 
 on:
     push:
@@ -17,7 +17,7 @@ jobs:
       max-parallel: 4
       matrix:
         node-version: [14.x]
-    name: Node ${{ matrix.java }}
+    name: Build with Node ${{ matrix.node-version }}
     env:
       OS: ${{ matrix.os }}
       NODE_VERSION: ${{ matrix.node-version }}
@@ -36,18 +36,20 @@ jobs:
     - name: Test
       working-directory: ./frontend
       run: npm test
-    - uses: azure/login@v1
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to azure storage
+    steps:
+     - uses: azure/login@v1
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
     - name: Upload to blob storage
       uses: azure/CLI@v1
       with:
         inlineScript: |
-            az storage blob upload-batch --account-name  facerecogwebsite --auth-mode key -d '$web' -s ./frontend/build/ --overwrite
-  # Azure logout
+            az storage blob upload-batch --account-name  facerecogwebsite --auth-mode key -d '$web' -s ./frontend/build/ --overwrite 
     - name: logout
       run: |
             az logout
