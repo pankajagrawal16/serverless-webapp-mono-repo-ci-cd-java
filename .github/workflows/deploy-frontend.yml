@@ -50,8 +50,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: Download artifact for deploy
       uses: actions/download-artifact@v3
-        with:
-          name: website
+      with:
+        name: website
     - name: Azure login
       uses: azure/login@v1
       with:
