@@ -15,3 +15,12 @@ module site 'site.bicep' = {
     location: location
   }
 }
+
+module cdn 'cdn.bicep' = {
+  name:'frontendcdn'
+  scope: staticsite
+  params: {
+    location: location
+    staticBlobUrl: site.outputs.staticBlobUrl
+  }
+}

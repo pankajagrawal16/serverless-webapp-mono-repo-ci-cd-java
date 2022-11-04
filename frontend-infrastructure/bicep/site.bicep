@@ -72,3 +72,4 @@ resource Microsoft_Resources_deploymentScripts_deploymentScript 'Microsoft.Resou
 }
 
 output staticWebsiteUrl string = siteaccount.properties.primaryEndpoints.web
+output staticBlobUrl string = siteaccount.properties.primaryEndpoints.blob
