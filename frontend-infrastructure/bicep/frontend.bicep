@@ -16,11 +16,25 @@ module site 'site.bicep' = {
   }
 }
 
+module dnszone 'dnszone.bicep'= {
+  scope: staticsite
+  name: 'dnszone'
+}
+
 module cdn 'cdn.bicep' = {
   name:'frontendcdn'
   scope: staticsite
   params: {
     location: location
-    staticBlobUrl: site.outputs.staticBlobUrl
+    staticWebsiteUrl: site.outputs.staticWebsiteUrl
+    dnsZoneName: dnszone.outputs.name
+  }
+}
+
+module dns 'dns-settings.bicep' = {
+  name: 'dns'
+  scope: staticsite
+  params: {
+    dnsZoneName: dnszone.outputs.name
   }
 }
