@@ -1,5 +1,11 @@
 param location string = resourceGroup().location
 
+var jsonServiceTag = loadJsonContent('ServiceTags_Public_20221031.json')
+
+var ipRulesArray = [for ip in jsonServiceTag.addressPrefixes : {
+    value: ip
+}]
+
 resource siteaccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   kind: 'StorageV2'
   location: location
@@ -8,7 +14,12 @@ resource siteaccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
     name: 'Standard_LRS'
   }
   properties: {
-    
+    allowBlobPublicAccess: false
+    publicNetworkAccess: 'Enabled'
+    networkAcls: {
+      defaultAction: 'Deny'
+      ipRules: ipRulesArray
+    }
   }
 }
 
