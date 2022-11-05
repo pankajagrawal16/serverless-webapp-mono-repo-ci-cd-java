@@ -11,23 +11,23 @@ resource dnsZone 'Microsoft.Network/dnsZones@2018-05-01' existing = {
   name: dnsZoneName
 }
 
-resource cdnProfile 'Microsoft.Cdn/profiles@2022-05-01-preview' = {
-  name: profileName
+resource msCdn 'Microsoft.Cdn/profiles@2022-05-01-preview' = {
+  name: 'ms${profileName}'
   location: location
   tags: {
-    displayName: profileName
+    displayName: 'ms${profileName}'
   }
   sku: {
-    name: 'Standard_Verizon'
+    name: 'Standard_Microsoft'
   }
 }
 
-resource endpoint 'Microsoft.Cdn/profiles/endpoints@2022-05-01-preview' = {
-  parent: cdnProfile
-  name: endpointName
+resource msEndpoint 'Microsoft.Cdn/profiles/endpoints@2022-05-01-preview' = {
+  parent: msCdn
+  name: 'ms${endpointName}'
   location: location
   tags: {
-    displayName: endpointName
+    displayName: 'ms${endpointName}'
   }
   properties: {
     originHostHeader: storageAccountHostName
@@ -50,38 +50,61 @@ resource endpoint 'Microsoft.Cdn/profiles/endpoints@2022-05-01-preview' = {
         }
       }
     ]
+    deliveryPolicy: {
+      rules:  [
+       {
+        actions: [
+          {
+            name: 'UrlRedirect'
+            parameters: {
+              redirectType: 'Found'
+              typeName: 'DeliveryRuleUrlRedirectActionParameters'
+              destinationProtocol:'Https'
+            }
+          }
+        ]
+        conditions:[
+          {
+            name: 'RequestScheme'
+            parameters: {
+              operator: 'Equal'
+              typeName: 'DeliveryRuleRequestSchemeConditionParameters'
+              matchValues: [
+                'HTTP'
+              ]
+              negateCondition:false
+            }
+          }
+        ]
+        order: 1
+        name: 'redirect'
+       } 
+      ]
+    }
   }
 }
 
-resource facerecog 'Microsoft.Network/dnsZones/CNAME@2018-05-01' = {
+resource msfacerecog 'Microsoft.Network/dnsZones/CNAME@2018-05-01' = {
   parent: dnsZone
-  name: cdnface
+  name: 'ms${cdnface}'
   properties: {
     targetResource: {
-      id: endpoint.id
+      id: msEndpoint.id
     }
     TTL: 15
   }
 }
 
-// resource customdomain 'Microsoft.Cdn/profiles/customDomains@2022-05-01-preview' = {
-//   name: cdnface
-//   parent: cdnProfile
-//   properties: {
-//     hostName: '${cdnface}.pankaagr.cloud'
-//     tlsSettings: {
-//       certificateType: 'AzureFirstPartyManagedCertificate'
-//     }
-//   }
-// }
-
-resource symbolicname 'Microsoft.Cdn/profiles/endpoints/customDomains@2022-05-01-preview' = {
-  name: cdnface
-  parent: endpoint
+resource msSymbolicName 'Microsoft.Cdn/profiles/endpoints/customDomains@2022-05-01-preview' = {
+  name: 'ms${cdnface}'
+  parent: msEndpoint
   properties: {
-    hostName: '${cdnface}.pankaagr.cloud'
+    hostName: 'ms${cdnface}.pankaagr.cloud'
   }
+  dependsOn: [
+    msfacerecog
+  ]
 }
 
-output hostName string = endpoint.properties.hostName
-output originHostHeader string = endpoint.properties.originHostHeader
+output hostName string = msEndpoint.properties.hostName
+output originHostHeader string = msEndpoint.properties.originHostHeader
