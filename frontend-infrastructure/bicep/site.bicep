@@ -16,10 +16,10 @@ resource siteaccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   properties: {
     allowBlobPublicAccess: false
     publicNetworkAccess: 'Enabled'
-    networkAcls: {
-      defaultAction: 'Deny'
-      ipRules: ipRulesArray
-    }
+    // networkAcls: {
+    //   defaultAction: 'Deny'
+    //   ipRules: ipRulesArray
+    // }
   }
 }
 
