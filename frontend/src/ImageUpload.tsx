@@ -73,8 +73,6 @@ const ImageUpload: React.FunctionComponent = () => {
             },
         };
 
-        console.log(result)
-        console.log(result.fileName)
         if(result.uploadURL) {
             fetch(result.uploadURL, putMethod)
                 .then(response => {
