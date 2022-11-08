@@ -7,7 +7,7 @@ export const GLOBAL_CONSTANTS = new Map<string, Config>();
 
 GLOBAL_CONSTANTS.set('JAVA', {
         'FIND_IMAGE': `https://f6i3hg4b16.execute-api.eu-west-1.amazonaws.com/Prod/recognise`,
-        'UPLOAD_URL': `https://f6i3hg4b16.execute-api.eu-west-1.amazonaws.com/Prod/upload-url`,
+        'UPLOAD_URL': `https://facerecogapp.azurewebsites.net/api/upload-url?code=ceMGuixrDAgPiI-OOnWRXm1Nc_44NeIaG257QAJ5tmsTAzFuLHUKkQ==`,
     });
 
 GLOBAL_CONSTANTS.set('PYTHON', {

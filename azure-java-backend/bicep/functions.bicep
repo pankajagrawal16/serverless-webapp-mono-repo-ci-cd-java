@@ -38,6 +38,78 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
   kind: 'Storage'
 }
 
+resource face 'Microsoft.Storage/storageAccounts@2021-08-01' = {
+  name: toLower('${appName}Store')
+  location: location
+  sku: {
+    name: storageAccountType
+  }
+  kind: 'Storage'
+}
+
+resource faceblobservice 'Microsoft.Storage/storageAccounts/blobServices@2022-05-01' = {
+  name: 'default'
+  parent: face
+  properties: {
+    cors: {
+      corsRules: [
+        {
+          allowedHeaders: [
+            '*'
+          ]
+          allowedMethods: [
+            'PUT'
+          ]
+          allowedOrigins: [
+            'http://localhost:3000'
+          ]
+          exposedHeaders: [
+            '*'
+          ]
+          maxAgeInSeconds: 5
+        }
+        {
+          allowedHeaders: [
+            '*'
+          ]
+          allowedMethods: [
+            'PUT'
+          ]
+          allowedOrigins: [
+            'https://localhost:3000'
+          ]
+          exposedHeaders: [
+            '*'
+          ]
+          maxAgeInSeconds: 5
+        }
+        {
+          allowedHeaders: [
+            '*'
+          ]
+          allowedMethods: [
+            'PUT'
+          ]
+          allowedOrigins: [
+            'https://*.pankaagr.cloud'
+          ]
+          exposedHeaders: [
+            '*'
+          ]
+          maxAgeInSeconds: 5
+        }
+      ]
+    }
+  }
+}
+
+resource imageContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-05-01' = {
+  name: '${face.name}/default/images'
+  properties: {
+    publicAccess: 'None'
+  }
+}
+
 resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   name: hostingPlanName
   location: location
@@ -86,11 +158,28 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           name: 'FUNCTIONS_WORKER_RUNTIME'
           value: functionWorkerRuntime
         }
+        {
+          name: 'APP_STORAGE_ACCOUNT'
+          value: face.name
+        }
+        {
+          name: 'AZURE_TENANT_ID'
+          value: subscription().tenantId
+        }
       ]
       ftpsState: 'FtpsOnly'
       minTlsVersion: '1.2'
     }
     httpsOnly: true
+  }
+}
+
+resource functionToStorageAccountRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, functionApp.id, subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'))
+  scope: face
+  properties: {
+    principalId: functionApp.identity.principalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
   }
 }
 

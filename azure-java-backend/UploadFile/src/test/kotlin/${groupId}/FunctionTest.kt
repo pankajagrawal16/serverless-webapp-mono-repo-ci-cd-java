@@ -21,7 +21,7 @@ class FunctionTest {
 
         val queryParams = HashMap<String, String>()
         queryParams["name"] = "Azure"
-        doReturn(queryParams).`when`<HttpRequestMessage<Optional<String>>>(req).queryParameters
+        doReturn(queryParams).`when`(req).queryParameters
 
         val queryBody = Optional.empty<String>()
         doReturn(queryBody).`when`<HttpRequestMessage<*>>(req).body

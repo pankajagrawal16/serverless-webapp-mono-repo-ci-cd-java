@@ -1,45 +1,78 @@
 package org.example
 
-import java.util.*
+import com.azure.identity.DefaultAzureCredentialBuilder
+import com.azure.storage.blob.BlobContainerClient
+import com.azure.storage.blob.BlobServiceClient
+import com.azure.storage.blob.BlobServiceClientBuilder
+import com.azure.storage.blob.sas.BlobSasPermission
+import com.azure.storage.blob.sas.BlobServiceSasSignatureValues
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.microsoft.azure.functions.*
 import com.microsoft.azure.functions.annotation.*
+import java.time.OffsetDateTime
+import java.util.*
 
 /**
  * Azure Functions with HTTP Trigger.
  */
 class Function {
 
-    /**
-     * This function listens at endpoint "/api/HttpTrigger-Java". Two ways to invoke it using "curl" command in bash:
-     * 1. curl -d "HTTP Body" {your host}/api/HttpTrigger-Java&={your function key}
-     * 2. curl "{your host}/api/HttpTrigger-Java?name=HTTP%20Query&code={your function key}"
-     * Function Key is not needed when running locally, it is used to invoke function deployed to Azure.
-     * More details: https://aka.ms/functions_authorization_keys
-     */
+    private val mapper = jacksonObjectMapper()
+
+    private val storageAccountUrl = "https://${System.getenv("APP_STORAGE_ACCOUNT")}.blob.core.windows.net"
+
+    private val client: BlobServiceClient = BlobServiceClientBuilder()
+        .endpoint(storageAccountUrl)
+        .credential(DefaultAzureCredentialBuilder().build())
+        .buildClient()
+
     @FunctionName("upload-url")
     fun run(
-            @HttpTrigger(
-                    name = "req",
-                    methods = [HttpMethod.GET, HttpMethod.POST],
-                    authLevel = AuthorizationLevel.FUNCTION) request: HttpRequestMessage<Optional<String>>,
-            context: ExecutionContext): HttpResponseMessage {
+        @HttpTrigger(
+            name = "req",
+            methods = [HttpMethod.GET, HttpMethod.POST],
+            authLevel = AuthorizationLevel.FUNCTION
+        ) request: HttpRequestMessage<Optional<String>>,
+        context: ExecutionContext
+    ): HttpResponseMessage {
 
         context.logger.info("HTTP trigger processed a ${request.httpMethod.name} request.")
 
-        val query = request.queryParameters["name"]
-        val name = request.body.orElse(query)
+        val fileExtension = request.queryParameters["file-extension"]
+        val fileName = fileExtension?.let { UUID.randomUUID().toString() + it }
 
-        name?.let {
+        fileName?.let {
+            val blobSasPermission = BlobSasPermission.parse("cw")
+
+            val blobServiceSasSignatureValues =
+                BlobServiceSasSignatureValues(OffsetDateTime.now().plusMinutes(5), blobSasPermission)
+
+            val blobContainerClient: BlobContainerClient = client.getBlobContainerClient("images")
+            val blobClient = blobContainerClient.getBlobClient(fileName)
+
+            val userDelegationKey = client.getUserDelegationKey(
+                blobServiceSasSignatureValues.startTime,
+                blobServiceSasSignatureValues.expiryTime
+            )
+
+            val generateUserDelegationSas =
+                blobClient.generateUserDelegationSas(blobServiceSasSignatureValues, userDelegationKey)
+
             return request
-                    .createResponseBuilder(HttpStatus.OK)
-                    .body("Hello, $name!")
-                    .build()
+                .createResponseBuilder(HttpStatus.OK)
+                .header("Content-Type", "application/json")
+                .header("Access-Control-Allow-Origin", "*")
+                .body(mapper.writeValueAsString(Response("${storageAccountUrl}/images/$fileName?$generateUserDelegationSas", it)))
+                .build()
         }
 
         return request
-                .createResponseBuilder(HttpStatus.BAD_REQUEST)
-                .body("Please pass a name on the query string or in the request body")
-                .build()
+            .createResponseBuilder(HttpStatus.BAD_REQUEST)
+            .body(mapper.writeValueAsString(ErrorResponse("Please pass a file-extension on the query string")))
+            .build()
     }
+
+    data class Response(val uploadURL: String, val fileName: String)
+    data class ErrorResponse(val message: String)
 
 }

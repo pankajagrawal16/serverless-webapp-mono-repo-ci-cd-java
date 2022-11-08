@@ -45,7 +45,7 @@ const ImageUpload: React.FunctionComponent = () => {
     };
 
     const getUrl = (dataToGetUrl: DataToGetUrl) => {
-        fetch(`${GLOBAL_CONSTANTS.get(backend)?.UPLOAD_URL}?content-type=${dataToGetUrl.type}&file-extension=.${dataToGetUrl.extension}&person-name=${dataToGetUrl.name}`)
+        fetch(`${GLOBAL_CONSTANTS.get(backend)?.UPLOAD_URL}&content-type=${dataToGetUrl.type}&file-extension=.${dataToGetUrl.extension}&person-name=${dataToGetUrl.name}`)
             .then(res => res.json())
             .then(
                 (result) => {
@@ -68,14 +68,18 @@ const ImageUpload: React.FunctionComponent = () => {
             headers: {
                 'Content-Type': contentType,
                 'x-amz-meta-fullname': name,
+                'x-ms-meta-fullname': name,
+                'x-ms-blob-type': 'BlockBlob'
             },
         };
 
+        console.log(result)
+        console.log(result.fileName)
         if(result.uploadURL) {
             fetch(result.uploadURL, putMethod)
                 .then(response => {
                     setLoading(false)
-                    if(response.status === 200 && response.statusText === 'OK') {
+                    if((response.status === 200 && response.statusText === 'OK')|| response.status === 201) {
                         setMessage('Upload Successful');
                     } else {
                         setMessage('Upload Failed');
