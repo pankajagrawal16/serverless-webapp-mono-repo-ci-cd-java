@@ -15,7 +15,7 @@ import java.util.*
 /**
  * Azure Functions with HTTP Trigger.
  */
-class Function {
+class UploadFunction {
 
     private val mapper = jacksonObjectMapper()
 

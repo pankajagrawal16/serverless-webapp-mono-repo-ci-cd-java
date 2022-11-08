@@ -11,7 +11,7 @@ import java.util.logging.Logger
 /**
  * Unit test for Function class.
  */
-class FunctionTest {
+class UploadFunctionTest {
 
     inline fun <reified T : Any> mock() = mock(T::class.java)
 
@@ -36,7 +36,7 @@ class FunctionTest {
         doReturn(Logger.getGlobal()).`when`(context).logger
 
         // Invoke
-        val ret = Function().run(req, context)
+        val ret = UploadFunction().run(req, context)
 
         // Verify
         assertEquals(ret.status, HttpStatus.OK)
