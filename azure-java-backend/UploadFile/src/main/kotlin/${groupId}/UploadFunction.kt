@@ -68,6 +68,7 @@ class UploadFunction {
 
         return request
             .createResponseBuilder(HttpStatus.BAD_REQUEST)
+            .header("Content-Type", "application/json")
             .body(mapper.writeValueAsString(ErrorResponse("Please pass a file-extension on the query string")))
             .build()
     }
