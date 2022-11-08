@@ -12,9 +12,6 @@ import com.microsoft.azure.functions.annotation.*
 import java.time.OffsetDateTime
 import java.util.*
 
-/**
- * Azure Functions with HTTP Trigger.
- */
 class UploadFunction {
 
     private val mapper = jacksonObjectMapper()

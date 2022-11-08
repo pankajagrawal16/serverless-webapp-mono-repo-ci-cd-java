@@ -35,7 +35,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
   sku: {
     name: storageAccountType
   }
-  kind: 'Storage'
+  kind: 'StorageV2'
 }
 
 resource face 'Microsoft.Storage/storageAccounts@2021-08-01' = {
@@ -44,7 +44,7 @@ resource face 'Microsoft.Storage/storageAccounts@2021-08-01' = {
   sku: {
     name: storageAccountType
   }
-  kind: 'Storage'
+  kind: 'StorageV2'
 }
 
 resource faceblobservice 'Microsoft.Storage/storageAccounts/blobServices@2022-05-01' = {
@@ -126,13 +126,15 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
 resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   name: functionAppName
   location: location
-  kind: 'functionapp'
+  kind: 'functionapp,linux'
   identity: {
     type: 'SystemAssigned'
   }
   properties: {
     serverFarmId: hostingPlan.id
     siteConfig: {
+      localMySqlEnabled: false
+      netFrameworkVersion: 'v4.6'
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
@@ -155,6 +157,10 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           value: applicationInsights.properties.InstrumentationKey
         }
         {
+          name: 'WEBSITE_RUN_FROM_PACKAGE'
+          value: '1'
+        }
+        {
           name: 'FUNCTIONS_WORKER_RUNTIME'
           value: functionWorkerRuntime
         }
@@ -166,10 +172,13 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           name: 'AZURE_TENANT_ID'
           value: subscription().tenantId
         }
+        {
+          name: 'TRIGGER_CONNECTION_serviceUri'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${face.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${face.listKeys().keys[0].value}'
+        }
       ]
-      ftpsState: 'FtpsOnly'
-      minTlsVersion: '1.2'
     }
+
     httpsOnly: true
   }
 }
@@ -180,6 +189,24 @@ resource functionToStorageAccountRoleAssignment 'Microsoft.Authorization/roleAss
   properties: {
     principalId: functionApp.identity.principalId
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
+  }
+}
+
+resource functionToStorageBlobAccountOwnerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, functionApp.id, subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'))
+  scope: face
+  properties: {
+    principalId: functionApp.identity.principalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')
+  }
+}
+
+resource functionToStorageAccountQueueRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, functionApp.id, subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '974c5e8b-45b9-4653-ba55-5f855dd0fb88'))
+  scope: face
+  properties: {
+    principalId: functionApp.identity.principalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '974c5e8b-45b9-4653-ba55-5f855dd0fb88')
   }
 }
 

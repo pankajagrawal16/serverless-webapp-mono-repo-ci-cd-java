@@ -79,6 +79,34 @@ resource msEndpoint 'Microsoft.Cdn/profiles/endpoints@2022-05-01-preview' = {
         order: 1
         name: 'redirect'
        } 
+       {
+        actions: [
+          {
+            name:  'UrlRewrite'
+            parameters: {
+              typeName: 'DeliveryRuleUrlRewriteActionParameters'
+              destination: '/index.html'
+              sourcePattern: '/'
+              preserveUnmatchedPath: false
+            }
+          }
+        ]
+        conditions:[
+          {
+            name: 'UrlFileExtension'
+            parameters: {
+              operator: 'LessThan'
+              typeName: 'DeliveryRuleUrlFileExtensionMatchConditionParameters'
+              matchValues: [
+                '1'
+              ]
+              negateCondition:false
+            }
+          }
+        ]
+        order: 2
+        name: 'rewritespa'
+       } 
       ]
     }
   }

@@ -8,9 +8,6 @@ import org.mockito.Mockito.*
 import java.util.*
 import java.util.logging.Logger
 
-/**
- * Unit test for Function class.
- */
 class UploadFunctionTest {
 
     inline fun <reified T : Any> mock() = mock(T::class.java)
@@ -42,18 +39,12 @@ class UploadFunctionTest {
         assertEquals(ret.status, HttpStatus.OK)
     }
 
-    /**
-     * Unit test for HttpTrigger GET method.
-     */
     @Test
     @Throws(Exception::class)
     fun testHttpTriggerGET() {
         testHttpTrigger(HttpMethod.GET)
     }
 
-    /**
-     * Unit test for HttpTrigger POST method.
-     */
     @Test
     @Throws(Exception::class)
     fun testHttpTriggerPOST() {
