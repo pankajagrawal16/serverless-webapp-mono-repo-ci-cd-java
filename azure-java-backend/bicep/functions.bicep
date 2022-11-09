@@ -29,7 +29,6 @@ param runtime string = 'java'
   'existing'
 ])
 param newOrExisting string
-param devSubsriptionUrl string
 
 var functionAppName = appName
 var hostingPlanName = appName
@@ -255,12 +254,5 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-module eventSubscriptions 'event.bicep' = {
-  name: 'eventSubsriptions'
-  params: {
-    location: location
-    storageId: face.id
-    functionApp: functionApp.name
-    devSubsriptionUrl: devSubsriptionUrl
-  }
-} 
+output storageAccountName string = face.name
+output functionApplicationName string = functionApp.name
