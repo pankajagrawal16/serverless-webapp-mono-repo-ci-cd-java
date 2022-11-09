@@ -23,6 +23,14 @@ param appInsightsLocation string = resourceGroup().location
 ])
 param runtime string = 'java'
 
+// For until https://github.com/Azure/azure-functions-host/issues/8189
+@allowed([
+  'new'
+  'existing'
+])
+param newOrExisting string
+param devSubsriptionUrl string
+
 var functionAppName = appName
 var hostingPlanName = appName
 var applicationInsightsName = appName
@@ -123,7 +131,7 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   }
 }
 
-resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
+resource functionApp 'Microsoft.Web/sites@2021-03-01' = if (newOrExisting == 'new') {
   name: functionAppName
   location: location
   kind: 'functionapp,linux'
@@ -205,6 +213,16 @@ resource functionToStorageAccountQueueRoleAssignment 'Microsoft.Authorization/ro
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '974c5e8b-45b9-4653-ba55-5f855dd0fb88')
   }
 }
+
+module eventSubscriptions 'event.bicep' = {
+  name: 'eventSubsriptions'
+  params: {
+    location: location
+    storageId: face.id
+    functionApp: functionApp.name
+    devSubsriptionUrl: devSubsriptionUrl
+  }
+} 
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: applicationInsightsName
