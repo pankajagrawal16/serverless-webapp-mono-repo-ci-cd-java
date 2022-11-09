@@ -117,7 +117,7 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
     name: 'Y1'
     tier: 'Dynamic'
   }
-  kind:'functionapp,linux'
+  kind:'functionapp'
   properties: {
     reserved: true
   }
@@ -134,7 +134,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
     serverFarmId: hostingPlan.id
     siteConfig: {
       localMySqlEnabled: false
-      netFrameworkVersion: 'v4.6'
+      linuxFxVersion:'java|8'
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
@@ -155,10 +155,6 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
           value: applicationInsights.properties.InstrumentationKey
-        }
-        {
-          name: 'WEBSITE_RUN_FROM_PACKAGE'
-          value: '1'
         }
         {
           name: 'FUNCTIONS_WORKER_RUNTIME'
