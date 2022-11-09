@@ -1,4 +1,5 @@
 param location string = resourceGroup().location
+param siteDeployRequired string
 
 var jsonServiceTag = loadJsonContent('ServiceTags_Public_20221031.json')
 
@@ -38,7 +39,7 @@ resource roleAssignments 'Microsoft.Authorization/roleAssignments@2020-10-01-pre
   }
 }
 
-resource Microsoft_Resources_deploymentScripts_deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+resource Microsoft_Resources_deploymentScripts_deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = if(siteDeployRequired == 'Yes') {
   name: 'deploymentScript'
   location: location
   kind: 'AzurePowerShell'

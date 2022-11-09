@@ -1,6 +1,14 @@
 @description('Specifies the location for resources.')
 param location string = 'westeurope'
 
+@description('Do we need to invoke deploy script?')
+@allowed( [
+  'Yes'
+  'No' 
+]
+)
+param siteDeployRequired string
+
 targetScope =  'subscription'
 
 resource staticsite 'Microsoft.Resources/resourceGroups@2021-04-01' = {
@@ -13,6 +21,7 @@ module site 'site.bicep' = {
   scope: staticsite
   params: {
     location: location
+    siteDeployRequired: siteDeployRequired
   }
 }
 
