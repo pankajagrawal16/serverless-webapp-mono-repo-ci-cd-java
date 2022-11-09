@@ -13,11 +13,11 @@ class FileUploadProcessorFunction {
             dataType = "binary",
             path = "images/{fileName}",
             source = "EventGrid",
-            connection = "TRIGGER_CONNECTION_serviceUri"
+            connection = "FaceStorage"
         ) content: ByteArray,
         @BindingName("fileName") fileName: String,
         context: ExecutionContext
     ) {
-        context.logger.info("Name: $fileName  Size: ${content.size} bytes");
+        context.logger.info("Name: $fileName  Size: ${content.size} bytes")
     }
 }

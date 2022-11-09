@@ -177,6 +177,25 @@
                             <name>FUNCTIONS_EXTENSION_VERSION</name>
                             <value>~4</value>
                         </property>
+                        <!--   Below properties are used for identity based triggers
+                        These can and should have been moved to IAC code. But it is here for now
+                        -->
+                        <property>
+                            <name>AzureWebJobsStorage__accountName</name>
+                            <value>facerecogappstore</value>
+                        </property>
+                        <!--                        Can be replaced with single prop of service uri as mentioned
+                                                here https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-blob-trigger?tabs=in-process%2Cextensionv5&pivots=programming-language-java#identity-based-connections
+                        once this is fixed https://github.com/Azure/azure-functions-host/issues/8019
+                        -->
+                        <property>
+                            <name>FaceStorage__blobServiceUri</name>
+                            <value>https://facerecogappstore.blob.core.windows.net</value>
+                        </property>
+                        <property>
+                            <name>FaceStorage__queueServiceUri</name>
+                            <value>https://facerecogappstore.queue.core.windows.net</value>
+                        </property>
                         <property>
                             <name>FUNCTIONS_EXTENSION_VERSION</name>
                             <value>~4</value>

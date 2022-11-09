@@ -144,6 +144,10 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = if (newOrExisting == 'ne
       localMySqlEnabled: false
       linuxFxVersion:'java|8'
       appSettings: [
+        // Although we are using identity based auth for blob triggered
+        // we are forced to use connection string as deployment plugin is still dependant on this config.
+        // we are not using this property anymore for trigger itself.
+        // https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference?tabs=blob#connecting-to-host-storage-with-an-identity-preview
         {
           name: 'AzureWebJobsStorage'
           value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
@@ -176,10 +180,10 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = if (newOrExisting == 'ne
           name: 'AZURE_TENANT_ID'
           value: subscription().tenantId
         }
-        {
-          name: 'TRIGGER_CONNECTION_serviceUri'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${face.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${face.listKeys().keys[0].value}'
-        }
+        // {
+        //   name: 'TRIGGER_CONNECTION_serviceUri'
+        //   value: 'DefaultEndpointsProtocol=https;AccountName=${face.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${face.listKeys().keys[0].value}'
+        // }
       ]
     }
 
@@ -187,7 +191,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = if (newOrExisting == 'ne
   }
 }
 
-resource functionToStorageAccountRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource faceBlobContributor'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(resourceGroup().id, functionApp.id, subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'))
   scope: face
   properties: {
@@ -196,7 +200,7 @@ resource functionToStorageAccountRoleAssignment 'Microsoft.Authorization/roleAss
   }
 }
 
-resource functionToStorageBlobAccountOwnerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource faceBlobOnwer 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(resourceGroup().id, functionApp.id, subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'))
   scope: face
   properties: {
@@ -205,12 +209,49 @@ resource functionToStorageBlobAccountOwnerRoleAssignment 'Microsoft.Authorizatio
   }
 }
 
-resource functionToStorageAccountQueueRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource faceQueueContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(resourceGroup().id, functionApp.id, subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '974c5e8b-45b9-4653-ba55-5f855dd0fb88'))
   scope: face
   properties: {
     principalId: functionApp.identity.principalId
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '974c5e8b-45b9-4653-ba55-5f855dd0fb88')
+  }
+}
+
+resource appStorageQueueContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, functionApp.id, storageAccount.id, subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '974c5e8b-45b9-4653-ba55-5f855dd0fb88'))
+  scope: storageAccount
+  properties: {
+    principalId: functionApp.identity.principalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '974c5e8b-45b9-4653-ba55-5f855dd0fb88')
+  }
+}
+
+resource appStorageContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, functionApp.id, storageAccount.id ,subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '17d1049b-9a84-46fb-8f53-869881c3d3ab'))
+  scope: storageAccount
+  properties: {
+    principalId: functionApp.identity.principalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '17d1049b-9a84-46fb-8f53-869881c3d3ab')
+  }
+}
+
+resource appStorageBlobOnwer 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, functionApp.id, storageAccount.id ,subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'))
+  scope: storageAccount
+  properties: {
+    principalId: functionApp.identity.principalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')
+  }
+}
+
+resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: applicationInsightsName
+  location: appInsightsLocation
+  kind: 'web'
+  properties: {
+    Application_Type: 'web'
+    Request_Source: 'rest'
   }
 }
 
@@ -223,13 +264,3 @@ module eventSubscriptions 'event.bicep' = {
     devSubsriptionUrl: devSubsriptionUrl
   }
 } 
-
-resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: applicationInsightsName
-  location: appInsightsLocation
-  kind: 'web'
-  properties: {
-    Application_Type: 'web'
-    Request_Source: 'rest'
-  }
-}
