@@ -191,6 +191,10 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = if (newOrExisting == 'ne
           name: 'FaceAppDatabaseConnectionString___accountEndpoint'
           value: 'https://${faceAppCosmoDbAccount.name}.documents.azure.com:443/'
         }
+        {
+          name: 'KEYVAULT_NAME'
+          value: 'FaceAppKv-${uniqueString(resourceGroup().id)}'
+        }
         // {
         //   name: 'TRIGGER_CONNECTION_serviceUri'
         //   value: 'DefaultEndpointsProtocol=https;AccountName=${face.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${face.listKeys().keys[0].value}'
