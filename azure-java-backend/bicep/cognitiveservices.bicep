@@ -68,3 +68,14 @@ resource functionAppRoleAssignment 'Microsoft.Authorization/roleAssignments@2022
     roleDefinitionId: dataActionsRole.id
   }
 }
+
+module keyVault 'kevault.bicep' = {
+  name: 'keyVault'
+  params: {
+    location: location
+    keyVaultName: 'FaceAppKv-${uniqueString(resourceGroup().id)}'
+    objectId: principalId
+    secretName: 'CognitiveServiceKey'
+    secretValue: cognitiveService.listKeys().key1
+  }
+}
