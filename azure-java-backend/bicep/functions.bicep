@@ -256,3 +256,4 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
 
 output storageAccountName string = face.name
 output functionApplicationName string = functionApp.name
+output systemAssignedManagedIdentityId string = functionApp.identity.principalId
