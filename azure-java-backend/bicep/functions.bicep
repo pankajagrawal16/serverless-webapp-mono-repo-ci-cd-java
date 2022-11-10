@@ -130,6 +130,10 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   }
 }
 
+resource faceAppCosmoDbAccount 'Microsoft.DocumentDB/databaseAccounts@2022-08-15' existing = {
+  name: 'faceapp-${uniqueString(resourceGroup().id)}'
+}
+
 resource functionApp 'Microsoft.Web/sites@2021-03-01' = if (newOrExisting == 'new') {
   name: functionAppName
   location: location
@@ -178,6 +182,14 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = if (newOrExisting == 'ne
         {
           name: 'AZURE_TENANT_ID'
           value: subscription().tenantId
+        }
+        {
+          name: 'FaceAppDatabaseConnectionString'
+          value: faceAppCosmoDbAccount.listConnectionStrings().connectionStrings[0].connectionString
+        }
+        {
+          name: 'FaceAppDatabaseConnectionString___accountEndpoint'
+          value: 'https://${faceAppCosmoDbAccount.name}.documents.azure.com:443/'
         }
         // {
         //   name: 'TRIGGER_CONNECTION_serviceUri'
@@ -241,6 +253,44 @@ resource appStorageBlobOnwer 'Microsoft.Authorization/roleAssignments@2022-04-01
   properties: {
     principalId: functionApp.identity.principalId
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')
+  }
+}
+
+@description('Friendly name for the SQL Role Definition')
+param roleDefinitionName string = 'FaceApp Read/Write Role'
+
+@description('Data actions permitted by the Role Definition')
+param dataActions array = [
+  'Microsoft.DocumentDB/databaseAccounts/readMetadata'
+  'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/*'
+  'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/*'
+]
+
+var roleDefinitionId = guid('sql-role-definition-', faceAppCosmoDbAccount.id)
+var roleAssignmentId = guid(roleDefinitionId, faceAppCosmoDbAccount.id)
+
+resource sqlRoleDefinition 'Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions@2022-08-15' = {
+  name: '${faceAppCosmoDbAccount.name}/${roleDefinitionId}'
+  properties: {
+    roleName: roleDefinitionName
+    type: 'CustomRole'
+    assignableScopes: [
+      faceAppCosmoDbAccount.id
+    ]
+    permissions: [
+      {
+        dataActions: dataActions
+      }
+    ]
+  }
+}
+
+resource sqlRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2022-08-15' = {
+  name: '${faceAppCosmoDbAccount.name}/${roleAssignmentId}'
+  properties: {
+    roleDefinitionId: sqlRoleDefinition.id
+    principalId: functionApp.identity.principalId
+    scope: faceAppCosmoDbAccount.id
   }
 }
 
