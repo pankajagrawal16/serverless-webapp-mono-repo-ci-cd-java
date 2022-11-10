@@ -48,7 +48,7 @@ resource dataActionsRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' = 
   properties: {
     roleName: 'Face Api data actions'
     description: 'Data action role to access cognitive face service apis'
-    type: 'customRole'
+    type: 'CustomRole'
     permissions: [
       {
         dataActions: dataActions
