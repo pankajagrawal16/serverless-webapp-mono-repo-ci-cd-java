@@ -68,8 +68,8 @@ class FileUploadProcessorFunction {
     @FunctionName("file-upload-processor")
     @CosmosDBOutput(
         name = "database",
-        databaseName = "faceapp",
-        containerName = "faces",
+        databaseName = "%FACE_APP_DATABASE_NAME%",
+        containerName = "%FACE_APP_CONTAINER_NAME%",
         connection = "FaceAppDatabaseConnectionString"
     )
     fun run(

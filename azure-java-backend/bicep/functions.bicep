@@ -36,6 +36,12 @@ var applicationInsightsName = appName
 var storageAccountName = '${uniqueString(resourceGroup().id)}azfunctions'
 var functionWorkerRuntime = runtime
 
+@description('Cosmo db database name')
+param cosmoDatabaseName string = 'faceapp'
+
+@description('Cosmo db database name')
+param cosmoContainerName string = 'faces'
+
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
   name: storageAccountName
   location: location
@@ -214,6 +220,14 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = if (newOrExisting == 'ne
         {
           name:'FaceStorage__blobServiceUri'
           value:'https://${face.name}.blob.${environment().suffixes.storage}'
+        }
+        {
+          name: 'FACE_APP_DATABASE_NAME'
+          value: cosmoDatabaseName
+        }
+        {
+          name: 'FACE_APP_CONTAINER_NAME'
+          value: cosmoContainerName
         }
       ]
     }
