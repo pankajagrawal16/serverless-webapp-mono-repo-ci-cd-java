@@ -108,6 +108,4 @@ class FileUploadProcessorFunction {
         context.logger.info("Name: $fileName  Size: ${content.size} bytes Meta name: $name")
         return mapper.writeValueAsString(faceId)
     }
-
-    data class FaceRegistration(val id: String, val name: String)
 }

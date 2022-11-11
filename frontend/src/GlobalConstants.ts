@@ -6,13 +6,13 @@ type Config = {
 export const GLOBAL_CONSTANTS = new Map<string, Config>();
 
 GLOBAL_CONSTANTS.set('JAVA', {
-        'FIND_IMAGE': `https://f6i3hg4b16.execute-api.eu-west-1.amazonaws.com/Prod/recognise`,
+        'FIND_IMAGE': `https://facerecogapp.azurewebsites.net/api/find-person?code=k31usW1BlCxAhx9juhjagRnDhthqBM2yP80ZUykfoRy2AzFuC5XJrA==`,
         'UPLOAD_URL': `https://facerecogapp.azurewebsites.net/api/upload-url?code=ceMGuixrDAgPiI-OOnWRXm1Nc_44NeIaG257QAJ5tmsTAzFuLHUKkQ==`,
     });
 
 GLOBAL_CONSTANTS.set('PYTHON', {
-    'FIND_IMAGE': `https://2rb53n6axc.execute-api.eu-west-1.amazonaws.com/Prod/recognise`,
-    'UPLOAD_URL': `https://2rb53n6axc.execute-api.eu-west-1.amazonaws.com/Prod/upload-url`,
+    'FIND_IMAGE': `https://facerecogapp.azurewebsites.net/api/find-person?code=k31usW1BlCxAhx9juhjagRnDhthqBM2yP80ZUykfoRy2AzFuC5XJrA==`,
+    'UPLOAD_URL': `https://facerecogapp.azurewebsites.net/api/upload-url?code=ceMGuixrDAgPiI-OOnWRXm1Nc_44NeIaG257QAJ5tmsTAzFuLHUKkQ==`,
 });
 
 export const Links_List = [

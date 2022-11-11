@@ -79,6 +79,10 @@ https://github.com/Azure/azure-functions-java-library/issues/190-->
         </dependency>
         <dependency>
             <groupId>com.azure</groupId>
+            <artifactId>azure-cosmos</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.azure</groupId>
             <artifactId>azure-security-keyvault-secrets</artifactId>
         </dependency>
 <!--        <dependency>-->

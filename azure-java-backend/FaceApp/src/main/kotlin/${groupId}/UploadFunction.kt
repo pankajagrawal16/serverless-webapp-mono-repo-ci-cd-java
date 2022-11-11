@@ -27,7 +27,7 @@ class UploadFunction {
     fun run(
         @HttpTrigger(
             name = "req",
-            methods = [HttpMethod.GET, HttpMethod.POST],
+            methods = [HttpMethod.GET],
             authLevel = AuthorizationLevel.FUNCTION
         ) request: HttpRequestMessage<Optional<String>>,
         context: ExecutionContext
@@ -59,18 +59,14 @@ class UploadFunction {
                 .createResponseBuilder(HttpStatus.OK)
                 .header("Content-Type", "application/json")
                 .header("Access-Control-Allow-Origin", "*")
-                .body(mapper.writeValueAsString(Response("${storageAccountUrl}/images/$fileName?$generateUserDelegationSas", it)))
+                .body(mapper.writeValueAsString(UploadImageResponse("${storageAccountUrl}/images/$fileName?$generateUserDelegationSas", it)))
                 .build()
         }
 
         return request
             .createResponseBuilder(HttpStatus.BAD_REQUEST)
             .header("Content-Type", "application/json")
-            .body(mapper.writeValueAsString(ErrorResponse("Please pass a file-extension on the query string")))
+            .body(mapper.writeValueAsString(UploadImageErrorResponse("Please pass a file-extension on the query string")))
             .build()
     }
-
-    data class Response(val uploadURL: String, val fileName: String)
-    data class ErrorResponse(val message: String)
-
 }

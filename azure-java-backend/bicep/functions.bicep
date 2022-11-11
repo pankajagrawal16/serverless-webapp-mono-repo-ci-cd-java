@@ -188,7 +188,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = if (newOrExisting == 'ne
           value: faceAppCosmoDbAccount.listConnectionStrings().connectionStrings[0].connectionString
         }
         {
-          name: 'FaceAppDatabaseConnectionString___accountEndpoint'
+          name: 'FaceAppDatabaseConnectionString__accountEndpoint'
           value: 'https://${faceAppCosmoDbAccount.name}.documents.azure.com:443/'
         }
         {
