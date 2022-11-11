@@ -14,9 +14,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>1.7.21</kotlin.version>
-<!--        Have to use older version which still does not support identity with cosmodb
-https://github.com/Azure/azure-functions-java-library/issues/190-->
-        <functions.version>2.2.0</functions.version>
+<!--       Using snapshot version until released to maven central https://github.com/Azure/azure-functions-java-library/issues/190-->
+        <functions.version>3.0.0-SNAPSHOT</functions.version>
         <functions.plugin.version>1.21.0</functions.plugin.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -182,50 +181,10 @@ https://github.com/Azure/azure-functions-java-library/issues/190-->
                     <subscriptionId>4a495935-942b-40cb-9a26-a468f977874b</subscriptionId>
                     <appServicePlanName>faceRecogApp</appServicePlanName>
                     <appInsightsInstance>faceRecogApp</appInsightsInstance>
-
                     <runtime>
                         <os>linux</os>
                         <javaVersion>8</javaVersion>
                     </runtime>
-                    <appSettings>
-                        <!-- Run Azure Function from package file by default -->
-<!--                        https://github.com/microsoft/azure-maven-plugins/wiki/Azure-Functions:-Configuration-Details#supported-deployment-type-->
-<!--                        <property>-->
-<!--                            <name>WEBSITE_RUN_FROM_PACKAGE</name>-->
-<!--                            <value>1</value>-->
-<!--                        </property>-->
-                        <property>
-                            <name>FUNCTIONS_EXTENSION_VERSION</name>
-                            <value>~4</value>
-                        </property>
-                        <!--   Below properties are used for identity based triggers
-                        These can and should have been moved to IAC code. But it is here for now
-                        -->
-                        <property>
-                            <name>AzureWebJobsStorage__accountName</name>
-                            <value>facerecogappstore</value>
-                        </property>
-                        <!--                        Can be replaced with single prop of service uri as mentioned
-                                                here https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-blob-trigger?tabs=in-process%2Cextensionv5&pivots=programming-language-java#identity-based-connections
-                        once this is fixed https://github.com/Azure/azure-functions-host/issues/8019
-                        -->
-                        <property>
-                            <name>FaceStorage__blobServiceUri</name>
-                            <value>https://facerecogappstore.blob.core.windows.net</value>
-                        </property>
-                        <property>
-                            <name>FaceStorage__queueServiceUri</name>
-                            <value>https://facerecogappstore.queue.core.windows.net</value>
-                        </property>
-                        <property>
-                            <name>FUNCTIONS_EXTENSION_VERSION</name>
-                            <value>~4</value>
-                        </property>
-                        <property>
-                            <name>FUNCTIONS_WORKER_RUNTIME</name>
-                            <value>java</value>
-                        </property>
-                    </appSettings>
                 </configuration>
                 <executions>
                     <execution>

@@ -156,6 +156,10 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = if (newOrExisting == 'ne
           value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
         }
         {
+          name: 'AzureWebJobsStorage__accountName'
+          value: storageAccount.name
+        }
+        {
           name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
           value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
         }
@@ -183,10 +187,10 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = if (newOrExisting == 'ne
           name: 'AZURE_TENANT_ID'
           value: subscription().tenantId
         }
-        {
-          name: 'FaceAppDatabaseConnectionString'
-          value: faceAppCosmoDbAccount.listConnectionStrings().connectionStrings[0].connectionString
-        }
+        // {
+        //   name: 'FaceAppDatabaseConnectionString'
+        //   value: faceAppCosmoDbAccount.listConnectionStrings().connectionStrings[0].connectionString
+        // }
         {
           name: 'FaceAppDatabaseConnectionString__accountEndpoint'
           value: 'https://${faceAppCosmoDbAccount.name}.documents.azure.com:443/'
@@ -195,10 +199,22 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = if (newOrExisting == 'ne
           name: 'KEYVAULT_NAME'
           value: 'FaceAppKv-${uniqueString(resourceGroup().id)}'
         }
-        // {
-        //   name: 'TRIGGER_CONNECTION_serviceUri'
-        //   value: 'DefaultEndpointsProtocol=https;AccountName=${face.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${face.listKeys().keys[0].value}'
-        // }
+        // Using temp property until latest version is released to maven central https://github.com/Azure/azure-functions-java-library/issues/190
+        {
+          name:'FUNCTIONS_EXTENSIONBUNDLE_SOURCE_URI'
+          value:'https://functionscdnstaging.azureedge.net/public'
+        }
+        // Can be replaced with single prop of service uri as mentioned
+        // here https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-blob-trigger?tabs=in-process%2Cextensionv5&pivots=programming-language-java#identity-based-connections
+        // once this is fixed https://github.com/Azure/azure-functions-host/issues/8019
+        {
+          name:'FaceStorage__queueServiceUri'
+          value:'https://${face.name}.queue.${environment().suffixes.storage}'
+        }
+        {
+          name:'FaceStorage__blobServiceUri'
+          value:'https://${face.name}.blob.${environment().suffixes.storage}'
+        }
       ]
     }
 

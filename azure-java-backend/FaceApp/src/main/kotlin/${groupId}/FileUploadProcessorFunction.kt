@@ -69,8 +69,8 @@ class FileUploadProcessorFunction {
     @CosmosDBOutput(
         name = "database",
         databaseName = "faceapp",
-        collectionName = "faces",
-        connectionStringSetting = "FaceAppDatabaseConnectionString"
+        containerName = "faces",
+        connection = "FaceAppDatabaseConnectionString"
     )
     fun run(
         @BlobTrigger(
