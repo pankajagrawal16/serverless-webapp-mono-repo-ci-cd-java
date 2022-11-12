@@ -1,6 +1,9 @@
 @description('The name of the function app that you wish to create.')
 param appName string = 'faceRecogApp'
 
+@description('Do you want to create new APIM?')
+param createApim bool
+
 @description('Storage Account type')
 @allowed([
   'Standard_LRS'
@@ -149,7 +152,14 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = if (newOrExisting == 'ne
   }
   properties: {
     serverFarmId: hostingPlan.id
+    
     siteConfig: {
+      ipSecurityRestrictions:  [for (ip, index) in loadJsonContent('ServiceTags_Public_20221107.json').properties.addressPrefixes: {
+          action: 'Allow'
+          ipAddress: ip
+          priority: index
+          description: 'AzureCloud.westeurope IP'
+        }]
       localMySqlEnabled: false
       linuxFxVersion:'java|8'
       appSettings: [
@@ -231,7 +241,6 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = if (newOrExisting == 'ne
         }
       ]
     }
-
     httpsOnly: true
   }
 }
@@ -335,6 +344,36 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   properties: {
     Application_Type: 'web'
     Request_Source: 'rest'
+  }
+}
+
+param resourceTags object = {
+  ProjectType: 'FaceApp'
+  Purpose: 'Demo'
+}
+
+module apim 'apim.bicep' = if (createApim) {
+  name: 'apim'
+  params: {
+    location: location
+    apimName: 'face-api-${uniqueString(resourceGroup().id)}'
+    appInsightsName: applicationInsights.name
+    appInsightsInstrumentationKey: applicationInsights.properties.InstrumentationKey
+    sku: 'Consumption'
+    skuCount:0
+    resourceTags: resourceTags
+  }
+}
+
+module apimAPI 'apimAPI.bicep' = {
+  name: 'apimAPI'
+  params: {
+    apiName:'face'
+    originUrl:'https://mscd-face.pankaagr.cloud'
+    devOriginUrl: 'http://localhost:3000'
+    apimName: 'face-api-${uniqueString(resourceGroup().id)}'
+    backendApiName: functionApp.name
+    currentResourceGroup: resourceGroup().name
   }
 }
 
