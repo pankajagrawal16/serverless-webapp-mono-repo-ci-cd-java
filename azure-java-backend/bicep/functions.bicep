@@ -369,7 +369,7 @@ module apimAPI 'apimAPI.bicep' = {
   name: 'apimAPI'
   params: {
     apiName:'face'
-    originUrl:'https://mscd-face.pankaagr.cloud'
+    originUrl:'https://app.pankaagr.cloud'
     devOriginUrl: 'http://localhost:3000'
     apimName: 'face-api-${uniqueString(resourceGroup().id)}'
     backendApiName: functionApp.name

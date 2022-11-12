@@ -1,7 +1,7 @@
 param location string = resourceGroup().location
 param staticWebsiteUrl string = ''
 param dnsZoneName string = ''
-param cdnface string = 'cd-face'
+param cdnface string = 'app'
 
 var storageAccountHostName = replace(replace(staticWebsiteUrl, 'https://', ''), '/', '')
 var profileName  = 'frontendcdn'
@@ -114,7 +114,7 @@ resource msEndpoint 'Microsoft.Cdn/profiles/endpoints@2022-05-01-preview' = {
 
 resource msfacerecog 'Microsoft.Network/dnsZones/CNAME@2018-05-01' = {
   parent: dnsZone
-  name: 'ms${cdnface}'
+  name: cdnface
   properties: {
     targetResource: {
       id: msEndpoint.id
@@ -124,10 +124,10 @@ resource msfacerecog 'Microsoft.Network/dnsZones/CNAME@2018-05-01' = {
 }
 
 resource msSymbolicName 'Microsoft.Cdn/profiles/endpoints/customDomains@2022-05-01-preview' = {
-  name: 'ms${cdnface}'
+  name: cdnface
   parent: msEndpoint
   properties: {
-    hostName: 'ms${cdnface}.pankaagr.cloud'
+    hostName: '${cdnface}.pankaagr.cloud'
   }
   dependsOn: [
     msfacerecog
