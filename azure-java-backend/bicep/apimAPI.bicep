@@ -95,7 +95,7 @@ resource opPostFindFace 'Microsoft.ApiManagement/service/apis/operations@2021-01
   properties: {
     displayName: 'Post image to find face'
     method: 'POST'
-    urlTemplate: '/find-face'
+    urlTemplate: '/find-person'
   }
 }
 
