@@ -126,6 +126,48 @@ resource imageContainer 'Microsoft.Storage/storageAccounts/blobServices/containe
   }
 }
 
+resource deleteLifeCyclePolicy 'Microsoft.Storage/storageAccounts/managementPolicies@2022-05-01' = {
+  name: 'default'
+  parent: face
+  properties: {
+    policy: {
+      rules:  [
+         {
+          name: 'deleteImagesOlderThanDays'
+          definition: {
+            filters: {
+             prefixMatch: [
+              'images/'
+             ]
+             blobTypes: [
+              'blockBlob'
+             ]
+            }
+            actions: {
+              baseBlob: {
+                delete: {
+                  daysAfterCreationGreaterThan: 7
+                }
+              }
+              snapshot: {
+                delete: {
+                  daysAfterCreationGreaterThan: 7
+                }
+              }
+              version: {
+                 delete: {
+                  daysAfterCreationGreaterThan: 7
+                 }
+              }
+            }
+          }
+          type: 'Lifecycle' 
+         }
+      ] 
+    }
+  }
+}
+
 resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   name: hostingPlanName
   location: location
